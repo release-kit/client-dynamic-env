@@ -1,83 +1,30 @@
 <p align="center">
-  <img src="logo.svg" width="200" align="center" alt="Typescript Library Logo" style="max-width: 100%;" />
-  <h1></h1>
-  <p align="center">
-    ✨ Your Library Description ✨
-  </p>
+  ✨ Dynamically insert environment variables into bundled file and extract them in runtime ✨
 </p>
 <br/>
 <p align="center">
-  <a href="https://github.com/js-templates/typescript-library/actions?query=branch%3Amain">
-    <img src="https://github.com/js-templates/typescript-library/actions/workflows/test-and-build.yml/badge.svg?event=push&branch=main" alt="typescript-library CI Status" />
+  <a href="https://github.com/release-kit/client-dynamic-env/actions?query=branch%3Amain">
+    <img src="https://github.com/release-kit/client-dynamic-env/actions/workflows/test-and-build.yml/badge.svg?event=push&branch=main" alt="typescript-library CI Status" />
   </a>
   <a href="https://opensource.org/licenses/MIT" rel="nofollow">
-    <img src="https://img.shields.io/github/license/js-templates/typescript-library" alt="License">
+    <img src="https://img.shields.io/github/license/release-kit/client-dynamic-env" alt="License">
   </a>
-  <a href="https://www.npmjs.com/package/@js-templates/typescript-library" rel="nofollow">
-    <img src="https://img.shields.io/npm/dw/@js-templates/typescript-library.svg" alt="npm">
+  <a href="https://www.npmjs.com/package/@release-kit/client-dynamic-env" rel="nofollow">
+    <img src="https://img.shields.io/npm/dw/@release-kit/client-dynamic-env.svg" alt="npm">
   </a>
-  <a href="https://www.npmjs.com/package/@js-templates/typescript-library" rel="nofollow">
-    <img src="https://img.shields.io/github/stars/js-templates/typescript-library" alt="stars">
+  <a href="https://www.npmjs.com/package/@release-kit/client-dynamic-env" rel="nofollow">
+    <img src="https://img.shields.io/github/stars/release-kit/client-dynamic-env" alt="stars">
   </a>
 </p>
-
-## Template Features
-
-- 🚀 Blazingly fast and easy installation
-- 💡 CI workflows configured for changelogs and release/prerelease cycles
-- 🧱 Perfect and easy-to-support tooling setup without any conflicts with CI environment
-- 📚 Well-documented conventions for project maintaining (commits, pull-requests, branches)
-
-## Using template
-
-### 1. Replace everything
-
-1. Replace all `@js-templates/typescript-library` entries with your library name
-2. Replace all `js-templates/typescript-library` entries with your repo path
-3. Replace all `Your Library Description` entries with your library description
-4. Replace all `Your Name` entries with your library name
-5. Update `logo.svg`
-6. Update logo's `alt`
-
-### 2. Add secrets
-
-- `NPM_TOKEN`
-- `FULL_ACCESS_GITHUB_TOKEN` if you plan to set up [the branch protection](#add-branch-protection)
-
-### 3. (optional) Set up branch protection
-
-1. Go to `Settings` > `Branches` > `Add rule`
-2. Specify `main` branch
-3. Enable the following options:
-   - Require a pull request before merging (without approvals)
-   - Require status checks to pass before merging (you need to run them at least once to appear):
-     - `test-and-build`
-     - `pr-labeler`
-   - Include administrators
-   - Allow force pushes
-4. Repeat, but using `release/*` instead of `main`
-5. [Create a new Personal Access Token](https://github.com/settings/tokens/new) with `repo` permissions
-6. Use it as a new Secret named `FULL_ACCESS_GITHUB_TOKEN`  
-   It's needed to bypass the branch protection on CI runs
-
-### 4. The last step
-
-Remove **Template Features** and **Using Template** sections from README (don't forget about Navigation links)
 
 ## Before you start
 
 The README on `main` branch may contain some unreleased changes.
 
-Go to [`release/latest`](https://github.com/js-templates/typescript-library/tree/release/latest) branch to see the actual README for the latest version from NPM.
+Go to [`release/latest`](https://github.com/release-kit/client-dynamic-env/tree/release/latest) branch to see the actual README for the latest version from NPM.
 
 ## Navigation
 
-- [Template Features](#template-features)
-- [Using template](#using-template)
-  - [Replace everything](#replace-everything)
-  - [Add secrets](#add-secrets)
-  - [Set up branch protection](#set-up-branch-protection)
-  - [The last step](#the-last-step)
 - [Installation](#installation)
 - [Contrubuting](#contributing)
 - [Maintenance](#maintenance)
@@ -90,13 +37,71 @@ Go to [`release/latest`](https://github.com/js-templates/typescript-library/tree
 NPM:
 
 ```sh
-npm install @js-templates/typescript-library
+npm install @release-kit/client-dynamic-env
 ```
 
 Yarn:
 
 ```sh
-yarn add @js-templates/typescript-library
+yarn add @release-kit/client-dynamic-env
+```
+
+## Usage
+
+### Dynamically insert env
+
+Add to your Docker entrypoint script:
+
+```sh
+# will also use .env.production and .env.production.local
+export CDE_ENV="production"
+# will use .env files located in apps/client directory
+export CDE_ENV_DIR="apps/client"
+# will take only envs prefixed with VITE_
+export CDE_ENV_PREFIX="VITE_"
+# will insert filtered envs into /client/dist/index.html file
+export CDE_DESTINATION="/client/dist/index.html"
+# will replace {{ ENV }} with filtered envs base64 string
+export CDE_SLOT="{{ ENV }}"
+
+source <(wget -qO- https://raw.githubusercontent.com/release-kit/client-dynamic-env/main/scripts/insert.sh)
+```
+
+The scripts loads `.env` files using the following order:
+
+- `.env` (lowest priority)
+- `.env.$CDE_ENV`
+- `.env.$CDE_ENV.local`
+- `.env.local` (highest priority)
+
+Environment variables are always expanded, so you can reuse them.
+
+### Extract env on client
+
+Assume we have the following in our `index.html`:
+
+```html
+<head>
+  <script>
+    window.env = '{{ ENV }}'
+  </script>
+</head>
+```
+
+We can extract env from `window.env` in production, and from `import.meta.env` / `process.env` in development:
+
+```tsx
+import { extractEnv } from '@release-kit/client-dynamic-env'
+
+export const env = extractEnv({
+  env: import.meta.env.DEV ? 'development' : 'production',
+  developmentEnv: import.meta.env,
+  productionSource: window.env,
+  validate: (env) => {
+    if (!env.VITE_API_URL) throw new Error('No VITE_API_URL specified')
+    return { apiUrl: env.VITE_API_URL }
+  },
+})
 ```
 
 ## Contributing
