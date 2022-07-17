@@ -26,6 +26,9 @@ Go to [`release/latest`](https://github.com/release-kit/client-dynamic-env/tree/
 ## Navigation
 
 - [Installation](#installation)
+- [Usage](#usage)
+  - [Dynamically insert env](#dynamically-insert-env)
+  - [Extract env on client](#extract-env-on-client)
 - [Contrubuting](#contributing)
 - [Maintenance](#maintenance)
   - [Regular flow](#regular-flow)
