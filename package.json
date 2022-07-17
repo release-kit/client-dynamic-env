@@ -1,8 +1,8 @@
 {
-  "name": "@js-templates/typescript-library",
+  "name": "@release-kit/client-dynamic-env",
   "version": "0.0.0-set-by-ci",
-  "description": "Your Library Description",
-  "author": "Your Name",
+  "description": "Dynamically insert environment variables into bundled file and extract them in runtime",
+  "author": "Evgeny Zakharov",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -10,7 +10,7 @@
   "files": [
     "dist/*"
   ],
-  "repository": "git@github.com:js-templates/typescript-library.git",
+  "repository": "git@github.com:release-kit/client-dynamic-env.git",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
