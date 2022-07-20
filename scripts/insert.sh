@@ -1,11 +1,5 @@
 #!/bin/bash
 
-export CDE_ENV="production"
-export CDE_ENV_DIR="apps/client"
-export CDE_ENV_PREFIX="VITE_"
-export CDE_DESTINATION="/final/apps/client/dist/index.html"
-export CDE_SLOT="{{ ENV }}"
-
 ################################
 ## Load environment variables ##
 ################################
