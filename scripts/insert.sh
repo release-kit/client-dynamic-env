@@ -1,5 +1,11 @@
 #!/bin/bash
 
+########################################
+## Save current environment variables ##
+########################################
+
+export -p > .cde-saved-env
+
 ################################
 ## Load environment variables ##
 ################################
@@ -18,6 +24,14 @@ do
 done
 
 set +o allexport
+
+#################################################
+##    Restore saved environment variables      ##
+## Globally defined envs should be #1 priority ##
+#################################################
+
+source .cde-saved-env
+rm .cde-saved-env
 
 ###################
 ## Generate JSON ##
